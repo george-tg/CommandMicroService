@@ -1,4 +1,4 @@
-package com.kth.journalsystem.config;
+package com.example.commandmicroservice.config;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.core.GrantedAuthority;

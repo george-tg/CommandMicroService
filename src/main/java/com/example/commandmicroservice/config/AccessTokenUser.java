@@ -1,4 +1,4 @@
-package com.kth.journalsystem.config;
+package com.example.commandmicroservice.config;
 
 import com.nimbusds.jose.shaded.gson.internal.LinkedTreeMap;
 import org.springframework.security.core.context.SecurityContext;

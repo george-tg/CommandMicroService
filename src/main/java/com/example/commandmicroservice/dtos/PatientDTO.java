@@ -1,7 +1,7 @@
-package com.kth.journalsystem.dto;
+package com.example.commandmicroservice.dtos;
 
+import com.example.commandmicroservice.config.AccessTokenUser;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.kth.journalsystem.config.AccessTokenUser;
 
 public class PatientDTO {
     private AccessTokenUser accessTokenUser;

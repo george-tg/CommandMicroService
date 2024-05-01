@@ -1,4 +1,4 @@
-package com.kth.journalsystem.config;
+package com.example.commandmicroservice.config;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

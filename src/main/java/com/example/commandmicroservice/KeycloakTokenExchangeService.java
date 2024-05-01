@@ -1,4 +1,4 @@
-package com.kth.journalsystem.service;
+package com.example.commandmicroservice;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;

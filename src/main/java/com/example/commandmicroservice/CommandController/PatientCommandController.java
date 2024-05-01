@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/patient")
 
-public class PatientController
+public class PatientCommandController
 {
     @Autowired
     PatientCommandService patientEventProducer;

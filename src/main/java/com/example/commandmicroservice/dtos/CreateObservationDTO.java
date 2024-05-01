@@ -1,4 +1,4 @@
-package com.kth.journalsystem.dto;
+package com.example.commandmicroservice.dtos;
 
 public class CreateObservationDTO {
 

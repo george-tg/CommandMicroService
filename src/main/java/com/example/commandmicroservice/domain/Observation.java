@@ -1,10 +1,10 @@
-package com.kth.journalsystem.domain;
+package com.example.commandmicroservice.domain;
 
 
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "observations")
+@Table(name = "observations_command")
 public class Observation
 {
     @Id

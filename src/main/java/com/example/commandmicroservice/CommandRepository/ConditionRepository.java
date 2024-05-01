@@ -1,6 +1,6 @@
-package com.kth.journalsystem.repository;
+package com.example.commandmicroservice.CommandRepository;
 
-import com.kth.journalsystem.domain.Condition;
+import com.example.commandmicroservice.domain.Condition;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

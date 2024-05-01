@@ -1,4 +1,4 @@
-package com.kth.journalsystem.domain;
+package com.example.commandmicroservice.domain;
 
 import jakarta.persistence.*;
 
@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "encounters")
+@Table(name = "encounters_command")
 public class Encounter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
