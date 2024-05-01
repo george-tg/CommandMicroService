@@ -22,12 +22,12 @@ public class PatientCommandController
 
     @PostMapping("/")
     @PreAuthorize("hasRole('ROLE_doctor')")
-    public ResponseEntity<PatientDTO> createPatient(@RequestBody PatientDTO patient) {
+    public ResponseEntity<String> createPatient(@RequestBody PatientDTO patient) {
         try {
             PatientDTO createdPatientDTO = new PatientDTO(patient.getId(), patient.getFirstName(), patient.getLastName(), patient.getAge());
             createdPatientDTO.setAccessTokenUser(AccessTokenUser.convert(SecurityContextHolder.getContext()));
             patientEventProducer.handleCreatePatientEvent(createdPatientDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdPatientDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body("Creating patient");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }

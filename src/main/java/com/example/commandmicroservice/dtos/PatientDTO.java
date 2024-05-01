@@ -2,7 +2,9 @@ package com.example.commandmicroservice.dtos;
 
 import com.example.commandmicroservice.config.AccessTokenUser;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 
+@Data
 public class PatientDTO {
     private AccessTokenUser accessTokenUser;
     private Long id;

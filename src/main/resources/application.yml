@@ -5,8 +5,8 @@ spring:
         registration:
           my-oauth2-client:
             provider: keycloak
-            client-id: journal
-            client-secret: yWIpK52fU3cAryzVDt3t6qFXDd53g3ad
+            client-id: write-journal
+            client-secret: 7dtDryvSEahyFvY0MIeYE44JlR3qzHam
             authorization-grant-type: authorization_code
             client-authentication-method: client_secret_basic
             scope: openid,profile
