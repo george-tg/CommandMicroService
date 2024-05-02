@@ -1,8 +1,9 @@
 package com.example.commandmicroservice.CommandController;
 
 import com.example.commandmicroservice.CommandService.ConditionCommandService;
+import com.example.commandmicroservice.CommandService.PatientCommandService;
 import com.example.commandmicroservice.dtos.ConditionDTO;
-import com.example.commandmicroservice.dtos.PatientDTO;
+import com.example.commandmicroservice.dtos.CreateConditionDTO;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,13 +17,15 @@ import org.springframework.web.bind.annotation.*;
 public class ConditionCommandController
 {
     @Autowired
-    ConditionCommandService conditionEventProducer;
+    private ConditionCommandService conditionCommandService;
+
+    @Autowired
+    private PatientCommandService patientCommandService;
 
     @PostMapping("/")
-    public ResponseEntity<ConditionDTO> createCondition(@RequestBody ConditionDTO conditionDTO) {
-        conditionEventProducer.handleCreateConditionEvent(conditionDTO);
-        ConditionDTO createdConditionDTO = new ConditionDTO(conditionDTO.getId(), conditionDTO.getConditionName(), conditionDTO.getPatient());
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdConditionDTO);
+    public ResponseEntity<String> createCondition(@RequestBody CreateConditionDTO conditionDTO) {
+        patientCommandService.handleUpdatePatientAddConditionEvent(conditionDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Creating condition...");
     }
 
 
@@ -31,7 +34,7 @@ public class ConditionCommandController
         try {
             ConsumerRecord<String, ConditionDTO> x = new ConsumerRecord<String, ConditionDTO>("update_condition_event", 0, 0L, id.toString(), updatedConditionDTO); ;
 
-            conditionEventProducer.handleUpdateConditionEvent(x);
+            conditionCommandService.handleUpdateConditionEvent(x);
             return "Updating condition" + id + ".......";
 
         }catch (Exception e){
@@ -41,7 +44,7 @@ public class ConditionCommandController
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCondition(@PathVariable Long id){
         try {
-            conditionEventProducer.handleDeleteConditionEvent(id);
+            conditionCommandService.handleDeleteConditionEvent(id);
             return ResponseEntity.status(HttpStatus.CREATED).body("Deleting condition: " + id + ".......");
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(" " + id);

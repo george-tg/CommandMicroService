@@ -13,6 +13,9 @@ public class PatientDTO {
     private int age;
     private String userId;
 
+    public PatientDTO() {
+    }
+
     public PatientDTO(Long id, String firstName, String lastName, int age) {
         this.id = id;
         this.firstName = firstName;

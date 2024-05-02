@@ -1,10 +1,12 @@
 package com.example.commandmicroservice.dtos;
 
 
+import com.example.commandmicroservice.config.AccessTokenUser;
 import com.example.commandmicroservice.domain.Condition;
 
 public class ConditionDTO
 {
+    private AccessTokenUser accessTokenUser;
     private Long id;
     private String conditionName;
     private PatientDTO patient;
@@ -22,6 +24,14 @@ public class ConditionDTO
         this.id = id;
         this.conditionName = conditionName;
         this.patient = patient;
+    }
+
+    public AccessTokenUser getAccessTokenUser() {
+        return accessTokenUser;
+    }
+
+    public void setAccessTokenUser(AccessTokenUser accessTokenUser) {
+        this.accessTokenUser = accessTokenUser;
     }
 
     public Long getId() {
@@ -53,4 +63,6 @@ public class ConditionDTO
         dto.setConditionName(entity.getConditionName());
         return dto;
     }
+
+
 }

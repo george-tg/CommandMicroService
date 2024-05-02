@@ -3,7 +3,10 @@ package com.example.commandmicroservice.CommandService;
 import com.example.commandmicroservice.CommandRepository.PatientRepository;
 import com.example.commandmicroservice.config.AccessTokenUser;
 import com.example.commandmicroservice.domain.Patient;
+import com.example.commandmicroservice.dtos.ConditionDTO;
+import com.example.commandmicroservice.dtos.CreateConditionDTO;
 import com.example.commandmicroservice.dtos.PatientDTO;
+import com.example.commandmicroservice.dtos.PatientDetailsDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -22,6 +25,7 @@ public class PatientCommandService
     private static final String CREATE_PATIENT_TOPIC = "create_patient_event";
     private static final String UPDATE_PATIENT_TOPIC = "update_patient_event";
     private static final String DELETE_PATIENT_TOPIC = "delete_patient_event";
+    private static final String CREATE_PATIENT_CONDITION_TOPIC = "create_patient_condition_event";
 
     @Autowired
     private KeycloakTokenExchangeService keycloakTokenExchangeService;
@@ -37,13 +41,21 @@ public class PatientCommandService
     private ObjectMapper objectMapper;
 
     public void handleDeletePatientEvent(Long id) {
-        AccessTokenUser accessTokenUser = AccessTokenUser.convert(SecurityContextHolder.getContext());
-        String reducedScopes = "patient";
-        accessTokenUser = keycloakTokenExchangeService.getLimitedScopeToken(accessTokenUser, reducedScopes);
-        List<String> scopes = accessTokenUser.getScopes();
-        if(scopes.size() == 1 && scopes.get(0).equals("patient")) {
-            patientRepository.deleteById(id);
-            kafkaTemplate.send(DELETE_PATIENT_TOPIC, id);
+        try {
+            AccessTokenUser accessTokenUser = AccessTokenUser.convert(SecurityContextHolder.getContext());
+            String reducedScopes = "patient";
+            PatientDTO patient = new PatientDTO();
+            patient.setId(id);
+            patient.setAccessTokenUser(keycloakTokenExchangeService.getLimitedScopeToken(accessTokenUser, reducedScopes));
+            List<String> scopes = accessTokenUser.getScopes();
+            if (scopes.size() == 1 && scopes.get(0).equals("patient")) {
+                patientRepository.deleteById(id);
+                String jsonPayload = objectMapper.writeValueAsString(patient);
+                logger.info("Sending delete_patient_event: " + jsonPayload);
+                kafkaTemplate.send(DELETE_PATIENT_TOPIC, jsonPayload);
+            }
+        } catch (JsonProcessingException e) {
+            logger.error("Error serializing PatientDTO to JSON while deleting patient: " + e.getMessage(), e);
         }
     }
 
@@ -75,6 +87,24 @@ public class PatientCommandService
             }
         } catch (JsonProcessingException e) {
             logger.error("Error serializing PatientDTO to JSON while updating patient: " + e.getMessage(), e);
+        }
+    }
+
+    public void handleUpdatePatientAddConditionEvent(CreateConditionDTO createConditionDTO) {
+        AccessTokenUser accessTokenUser = AccessTokenUser.convert(SecurityContextHolder.getContext());
+        String reducedScopes = "patient condition";
+        createConditionDTO.setAccessTokenUser(keycloakTokenExchangeService.getLimitedScopeToken(accessTokenUser, reducedScopes));
+        List<String> scopes = createConditionDTO.getAccessTokenUser().getScopes();
+        if(scopes.size() == 2 && scopes.contains("patient") && scopes.contains("condition")){
+            Optional<Patient> existing = patientRepository.findById(createConditionDTO.getPatientId());
+            if (existing.isPresent()) {
+                ConditionDTO conditionDTO = new ConditionDTO(createConditionDTO.getCondition(), new PatientDTO(existing.get().getId(), existing.get().getFirstName(), existing.get().getLastName(), existing.get().getAge()));
+                conditionDTO.setAccessTokenUser(accessTokenUser);
+                logger.info("Sending create_patient_condition_event: " + conditionDTO);
+                kafkaTemplate.send(CREATE_PATIENT_CONDITION_TOPIC, conditionDTO);
+            } else {
+                throw new RuntimeException("Can't update patient to add condition " + createConditionDTO);
+            }
         }
     }
 
