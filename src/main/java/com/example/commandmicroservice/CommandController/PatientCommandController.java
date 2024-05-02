@@ -37,9 +37,8 @@ public class PatientCommandController
     @PreAuthorize("hasRole('ROLE_doctor')")
     public ResponseEntity<String> updatePatient(@PathVariable Long id, @RequestBody PatientDTO patient){
         try {
-            ConsumerRecord<String, PatientDTO> x = new ConsumerRecord<String, PatientDTO>("update_patient_event", 0, 0L, id.toString(), patient); ;
 
-            patientEventProducer.handleUpdatePatientEvent(x);
+            patientEventProducer.handleUpdatePatientEvent(patient);
             return ResponseEntity.status(HttpStatus.CREATED).body("Updating patient" + id + ".......");
 
         }catch (Exception e){

@@ -20,16 +20,14 @@ public class KeycloakTokenExchangeService {
     private static final String CLIENT_SECRET = "7dtDryvSEahyFvY0MIeYE44JlR3qzHam";
     private final RestTemplate restTemplate = new RestTemplateBuilder().build();
 
-    public AccessTokenUser getLimitedScopeToken(AccessTokenUser accessTokenUser) throws RestClientException {
-        String scope = "patient"; // Replace with your specific scope
-
+    public AccessTokenUser getLimitedScopeToken(AccessTokenUser accessTokenUser, String reducedScopes) throws RestClientException {
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "urn:ietf:params:oauth:grant-type:token-exchange");
         body.add("client_id", CLIENT_ID);
         body.add("client_secret", CLIENT_SECRET);
         body.add("subject_token", accessTokenUser.getToken());
         body.add("subject_token_type", "urn:ietf:params:oauth:token-type:access_token");
-        body.add("scope", scope);
+        body.add("scope", reducedScopes);
         var headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
