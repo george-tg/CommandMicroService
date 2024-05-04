@@ -3,10 +3,7 @@ package com.example.commandmicroservice.CommandService;
 import com.example.commandmicroservice.CommandRepository.PatientRepository;
 import com.example.commandmicroservice.config.AccessTokenUser;
 import com.example.commandmicroservice.domain.Patient;
-import com.example.commandmicroservice.dtos.ConditionDTO;
-import com.example.commandmicroservice.dtos.CreateConditionDTO;
-import com.example.commandmicroservice.dtos.PatientDTO;
-import com.example.commandmicroservice.dtos.PatientDetailsDTO;
+import com.example.commandmicroservice.dtos.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -16,6 +13,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 @Service
@@ -26,6 +24,7 @@ public class PatientCommandService
     private static final String UPDATE_PATIENT_TOPIC = "update_patient_event";
     private static final String DELETE_PATIENT_TOPIC = "delete_patient_event";
     private static final String CREATE_PATIENT_CONDITION_TOPIC = "create_patient_condition_event";
+    private static final String CREATE_PATIENT_ENCOUNTER_OBSERVATION_TOPIC = "create_patient_encounter_observation_event";
 
     @Autowired
     private KeycloakTokenExchangeService keycloakTokenExchangeService;
@@ -90,7 +89,7 @@ public class PatientCommandService
         }
     }
 
-    public void handleUpdatePatientAddConditionEvent(CreateConditionDTO createConditionDTO) {
+    public void addConditionEvent(CreateConditionDTO createConditionDTO) {
         AccessTokenUser accessTokenUser = AccessTokenUser.convert(SecurityContextHolder.getContext());
         String reducedScopes = "patient condition";
         createConditionDTO.setAccessTokenUser(keycloakTokenExchangeService.getLimitedScopeToken(accessTokenUser, reducedScopes));
@@ -104,6 +103,26 @@ public class PatientCommandService
                 kafkaTemplate.send(CREATE_PATIENT_CONDITION_TOPIC, conditionDTO);
             } else {
                 throw new RuntimeException("Can't update patient to add condition " + createConditionDTO);
+            }
+        }
+    }
+
+    public void addEncounterObservationEvent(CreateEncounterObservationDTO createEncounterObservationDTO) {
+        AccessTokenUser accessTokenUser = AccessTokenUser.convert(SecurityContextHolder.getContext());
+        String reducedScopes = "patient encounter observation";
+        createEncounterObservationDTO.setAccessTokenUser(keycloakTokenExchangeService.getLimitedScopeToken(accessTokenUser, reducedScopes));
+        List<String> scopes = createEncounterObservationDTO.getAccessTokenUser().getScopes();
+        if(scopes.size() == 3 && scopes.contains("patient") && scopes.contains("encounter") && scopes.contains("observation")){
+            Optional<Patient> existing = patientRepository.findById(createEncounterObservationDTO.getPatientId());
+            if (existing.isPresent()) {
+                PatientDTO patientDTO = new PatientDTO(existing.get().getId(), existing.get().getFirstName(), existing.get().getLastName(), existing.get().getAge());
+                ObservationDTO observationDTO = new ObservationDTO(createEncounterObservationDTO.getObservationType(), createEncounterObservationDTO.getObservationValue(), patientDTO);
+                EncounterDTO encounterDTO = new EncounterDTO(LocalDate.now(), patientDTO, observationDTO);
+                encounterDTO.setAccessTokenUser(accessTokenUser);
+                logger.info("Sending create_patient_encounter_observation_event: " + encounterDTO);
+                kafkaTemplate.send(CREATE_PATIENT_ENCOUNTER_OBSERVATION_TOPIC, encounterDTO);
+            } else {
+                throw new RuntimeException("Can't update patient to add encounter " + createEncounterObservationDTO);
             }
         }
     }

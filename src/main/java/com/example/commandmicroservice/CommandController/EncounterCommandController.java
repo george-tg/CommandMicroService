@@ -1,7 +1,8 @@
 package com.example.commandmicroservice.CommandController;
 
 import com.example.commandmicroservice.CommandService.EncounterCommandService;
-import com.example.commandmicroservice.dtos.ConditionDTO;
+import com.example.commandmicroservice.CommandService.PatientCommandService;
+import com.example.commandmicroservice.dtos.CreateEncounterObservationDTO;
 import com.example.commandmicroservice.dtos.EncounterDTO;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,22 +15,26 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/encounter")
 public class EncounterCommandController
 {
+    @Autowired
+    private EncounterCommandService encounterCommandService;
+
+    @Autowired
+    private PatientCommandService patientCommandService;
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteEncounter(@PathVariable Long id){
         try {
-            encounterEventProducer.handleDeleteEncounterEvent(id);
+            encounterCommandService.handleDeleteEncounterEvent(id);
             return ResponseEntity.status(HttpStatus.CREATED).body("Deleting encounter: " + id + ".......");
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(" " + id);
 
         }
     }
-    @Autowired
-    private EncounterCommandService encounterEventProducer;
     @PostMapping("/")
-    public ResponseEntity<EncounterDTO> createEncounter(@RequestBody EncounterDTO encounterDTO) {
-        encounterEventProducer.handleCreateEncounterEvent(encounterDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(encounterDTO);
+    public ResponseEntity<String> createEncounter(@RequestBody CreateEncounterObservationDTO encounterDTO) {
+        patientCommandService.addEncounterObservationEvent(encounterDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Creating encounter and observation");
     }
 
 
@@ -38,7 +43,7 @@ public class EncounterCommandController
     public ResponseEntity<String>  updateEncounter(@PathVariable Long id, @RequestBody EncounterDTO encounterDTO){
         try {
             ConsumerRecord<String, EncounterDTO> x = new ConsumerRecord<String, EncounterDTO>("update_encounter_event", 0, 0L, id.toString(), encounterDTO); ;
-            encounterEventProducer.handleUpdateEncounterEvent(x);
+            encounterCommandService.handleUpdateEncounterEvent(x);
             return ResponseEntity.status(HttpStatus.CREATED).body("Updating Encounter with id: " + id);
 
         }catch (Exception e){

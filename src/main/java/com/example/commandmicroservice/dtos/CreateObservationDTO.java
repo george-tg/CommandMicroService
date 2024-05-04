@@ -5,7 +5,6 @@ public class CreateObservationDTO {
     private String type;
     private double value;
     private Long patientId;
-
     private Long encounterId;
 
     public CreateObservationDTO(String type, double value, Long patientId, Long encounterId) {
