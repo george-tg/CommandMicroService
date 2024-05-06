@@ -57,7 +57,7 @@ public class ConditionCommandService
         return new ConditionDTO(condition.getId(), condition.getConditionName(), PatientCommandService.convertToDTO(condition.getPatient()));
     }
 
-    @KafkaListener(topics = "create_patient_condition_event", groupId = "condition_group")
+    @KafkaListener(topics = "create_patient_condition_event", groupId = "command_condition_group")
     public void handleCreateConditionEvent(ConditionDTO conditionDTO) {
         try{
             if(conditionDTO.getAccessTokenUser().getScopes().size() == 2 && conditionDTO.getAccessTokenUser().getScopes().contains("patient") && conditionDTO.getAccessTokenUser().getScopes().contains("condition")) {

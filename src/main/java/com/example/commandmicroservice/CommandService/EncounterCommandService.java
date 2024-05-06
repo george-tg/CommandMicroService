@@ -34,7 +34,7 @@ public class EncounterCommandService
 
     @Autowired
     private KeycloakTokenExchangeService keycloakTokenExchangeService;
-    @KafkaListener(topics = "create_patient_encounter_observation_event", groupId = "encounter_group")
+    @KafkaListener(topics = "create_patient_encounter_observation_event", groupId = "command_encounter_group")
     public void handleCreateEncounterEvent(EncounterDTO encounterDTO) {
         try {
             List<String> originalScopes = encounterDTO.getAccessTokenUser().getScopes();
@@ -86,7 +86,7 @@ public class EncounterCommandService
         return new EncounterDTO(encounter.getId(),encounter.getVisitDate(), PatientCommandService.convertToDTO(encounter.getPatient()));
     }
 
-    @KafkaListener(topics = "delete_observation_event", groupId = "observation_group")
+    @KafkaListener(topics = "delete_observation_event", groupId = "command_observation_group")
     public void handleDeleteEncounterEvent(Long id) {
         repository.deleteById(id);
         kafkaTemplate.send("delete_observation_event",id);

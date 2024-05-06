@@ -41,7 +41,7 @@ public class ObservationCommandService
     @Autowired
     private EncounterRepository encounterRepository;
 
-    @KafkaListener(topics = "create_patient_observation_event", groupId = "observation_group")
+    @KafkaListener(topics = "create_patient_observation_event", groupId = "command_observation_group")
     public void handleCreateObservationEvent(ObservationDTO observationDTO) {
         try{
             List<String> originalScopes = observationDTO.getAccessTokenUser().getScopes();
